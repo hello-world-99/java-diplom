@@ -8,11 +8,12 @@ import java.io.IOException;
 import java.net.URL;
 
 public class Convert implements TextGraphicsConverter {
-     int maxWidth;
-     int maxHeight;
-     double maxPngRatio;
+    int maxWidth;
+    int maxHeight;
+    double maxPngRatio;
     int color;
-    StringBuilder stringBuilder=new StringBuilder();
+    StringBuilder stringBuilder = new StringBuilder();
+
     @Override
     public String convert(String url) throws IOException, BadImageSizeException {
         /**
@@ -24,13 +25,15 @@ public class Convert implements TextGraphicsConverter {
          */
         //url= URLEncoder.encode(url,"UTF-8");
         Color schema = new Color();
-        setTextColorSchema(schema);
+
         BufferedImage img = ImageIO.read(new URL(url));
 
-         stringBuilder=new StringBuilder();
+        stringBuilder = new StringBuilder();
+        setTextColorSchema(schema);
 
-        setMaxWidth(img.getWidth());
-        setMaxHeight(img.getHeight());
+
+        //корректирую размер
+        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
         int newWidth = img.getWidth();
         int newHeight = img.getHeight();
@@ -46,16 +49,16 @@ public class Convert implements TextGraphicsConverter {
             }
             //throw new BadImageSizeException(img.getHeight()/img.getWidth(),maxPngRatio);
         }
-        double scale =1;
-        if (newHeight > maxHeight&&newHeight>=newWidth) {
-             scale = img.getHeight() / maxHeight;
-        }
-          else if (newWidth > maxWidth&&newWidth>newHeight) {
-             scale = img.getWidth() / maxWidth;
-        }
-        newWidth = (int) (newWidth / scale);
-        newHeight = (int) (newHeight / scale);
+        double scale = 1;
+        if (newHeight > maxHeight && newHeight >= newWidth) {
+            scale = img.getHeight() / maxHeight;
+        } else if (newWidth > maxWidth && newWidth > newHeight) {
+            scale = img.getWidth() / maxWidth / 0.8;
 
+        }
+        newWidth = newWidth / (int) (scale + 1);
+        newHeight = newHeight / (int) (scale + 1);
+        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
         Image scaledImage = img.getScaledInstance(newWidth, newHeight, BufferedImage.SCALE_AREA_AVERAGING);
         BufferedImage bwImg = new BufferedImage(newWidth, newHeight, BufferedImage.TYPE_BYTE_GRAY);
@@ -63,21 +66,22 @@ public class Convert implements TextGraphicsConverter {
         graphics.drawImage(scaledImage, 0, 0, null);
         WritableRaster bwRaster = bwImg.getRaster();
 
-
+        //заполняю строку
+        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         for (int h = 0; h < newHeight; h++) {
             for (int w = 0; w < newWidth; w++) {
-                 color = bwRaster.getPixel(w, h, new int[3])[0];
-
-
-                char[] c = new char[] {schema.convert(color),schema.convert(color),schema.convert(color)};
+                color = bwRaster.getPixel(w, h, new int[3])[0];
+                char[] c = new char[]{schema.convert(color), schema.convert(color), schema.convert(color)};
                 stringBuilder.append(c);
+
 
             }
             stringBuilder.append("\n");
 
         }
-
+        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         return stringBuilder.toString();
+
     }
 
     @Override
@@ -96,8 +100,8 @@ public class Convert implements TextGraphicsConverter {
     }
 
     @Override
-    public void setTextColorSchema(TextColorSchema schema) {
-
+    public void setTextColorSchema(Color schema) {
+        schema.c = "@%$#+*-'";
     }
 }
 

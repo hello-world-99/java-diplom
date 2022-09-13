@@ -35,7 +35,7 @@ public class GServer {
 
     public void start() {
         System.out.println("Запускаем сервер на порту " + PORT);
-        System.out.println("Открой в браузере http://localhost:8888/");
+        System.out.println("Открой в браузере http://localhost:8880/");
         server.start();
     }
 
